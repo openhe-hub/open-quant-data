@@ -1,10 +1,10 @@
 import datetime
 
-from pkg.open_quant_data.dataset import DatasetConfig
-from pkg.open_quant_data.dataset.CsvUtils import CsvUtils
-from pkg.open_quant_data.model.StockDataTimed import StockDataTimed
-from pkg.open_quant_data.model.TimeSegment import TimeSegment
-from pkg.open_quant_data.mysql.MysqlUtils import MysqlUtils
+from open_quant_data.dataset import DatasetConfig
+from open_quant_data.dataset.CsvUtils import CsvUtils
+from open_quant_data.model.StockDataTimed import StockDataTimed
+from open_quant_data.model.TimeSegment import TimeSegment
+from open_quant_data.mysql.MysqlUtils import MysqlUtils
 
 import pandas as pd
 

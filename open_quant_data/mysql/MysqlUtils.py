@@ -1,8 +1,8 @@
 import pymysql
 
-from pkg.open_quant_data.model.StockData import StockData
-from pkg.open_quant_data.model.StockDataTimed import StockDataTimed
-from pkg.open_quant_data.model.TimeSegment import TimeSegment
+from open_quant_data.model.StockData import StockData
+from open_quant_data.model.StockDataTimed import StockDataTimed
+from open_quant_data.model.TimeSegment import TimeSegment
 
 
 class MysqlUtils:

@@ -1,6 +1,6 @@
 import datetime
 
-from pkg.open_quant_data.model.StockData import StockData
+from open_quant_data.model.StockData import StockData
 
 
 class StockDataTimed:

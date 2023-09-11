@@ -1,3 +1,6 @@
 .idea
 .vscode
 assets
+build
+dist
+open_quant_data.egg-info

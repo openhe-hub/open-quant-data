@@ -1,4 +1,4 @@
-from pkg.open_quant_data.model.StockDataTimed import StockDataTimed
+from open_quant_data.model.StockDataTimed import StockDataTimed
 
 import csv
 
