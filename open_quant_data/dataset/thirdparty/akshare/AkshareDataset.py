@@ -98,6 +98,16 @@ class AkshareDataset:
         return dataset
 
     @staticmethod
+    def fund_daily(fund_id: str) -> pd.DataFrame:
+        dataset = ak.fund_etf_fund_daily_em()
+        return dataset
+
+    @staticmethod
+    def fund_timed(fund_id: str, start_date: str, end_date: str) -> pd.DataFrame:
+        dataset = ak.fund_etf_fund_info_em(fund=fund_id, start_date=start_date, end_date=end_date)
+        return dataset
+
+    @staticmethod
     def between_date(data: DataFrame, start_date: str, end_date: str, date_col_name='date') -> DataFrame:
         filtered_data = data[(data[date_col_name] >= start_date) & (data[date_col_name] <= end_date)]
         return filtered_data
