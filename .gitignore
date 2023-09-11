@@ -4,3 +4,4 @@ assets
 build
 dist
 open_quant_data.egg-info
+open_quant_data/tests

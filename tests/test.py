@@ -1,4 +1,4 @@
-from open_quant_data.dataset.thirdparty.akshare.AkshareDataset import AkshareDataset as ak
+from open_quant_data.dataset.thirdparty.akshare.AkshareDataset import AkshareDataset as ak, ReportPeriod
 from datetime import datetime
 
 if __name__ == '__main__':

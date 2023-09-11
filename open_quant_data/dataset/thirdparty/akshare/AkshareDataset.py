@@ -5,7 +5,7 @@ from enum import Enum
 import akshare as ak
 import pandas as pd
 from pandas import DataFrame
-import math
+from loguru import logger
 
 
 class ReportPeriod(Enum):
@@ -105,6 +105,17 @@ class AkshareDataset:
     @staticmethod
     def fund_timed(fund_id: str, start_date: str, end_date: str) -> pd.DataFrame:
         dataset = ak.fund_etf_fund_info_em(fund=fund_id, start_date=start_date, end_date=end_date)
+        column_translation = {
+            '净值日期': 'date',
+            '单位净值': 'unit_equity',
+            '累计净值': 'cumulative_equity',
+            '日增长率': 'increase_rate',
+            '申购状态': 'subscription_status',
+            '赎回状态': 'redemption_status',
+        }
+        for old_col, new_col in column_translation.items():
+            if old_col in dataset.columns:
+                dataset.rename(columns={old_col: new_col}, inplace=True)
         return dataset
 
     @staticmethod
