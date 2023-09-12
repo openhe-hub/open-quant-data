@@ -1,0 +1,10 @@
+[trade]
+env_path = 'D:\software\迅投QMT交易终端   国盛证券实盘版\userdata_mini'
+session_id = 123456
+account_id = '66086000120'
+
+[stock]
+stock_ids = []
+
+[assets]
+position_avg_mode = true
