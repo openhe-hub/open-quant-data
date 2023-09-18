@@ -98,6 +98,42 @@ class AkshareDataset:
         return dataset
 
     @staticmethod
+    def bond_info_all(filtered_date: datetime.datetime = datetime.date(2023, 8, 1)) -> DataFrame:
+        dataset = ak.bond_zh_cov()
+        dataset = pd.DataFrame({
+            'bond_id': dataset['债券代码'],
+            'buy_date': dataset['申购日期'],
+            'stock_id': dataset['正股代码'],
+            'transform_ratio': dataset['转股溢价率']
+        })
+        # filter date
+        dataset = dataset[dataset['buy_date'] < filtered_date]
+
+        # add bond id suffix
+        def add_bond_suffix(bond: int):
+            if str(bond).startswith('12'):
+                return f"{bond}.SZ"
+            elif str(bond).startswith('11'):
+                return f"{bond}.SH"
+            else:
+                return bond
+
+        dataset['bond_id'] = dataset['bond_id'].apply(add_bond_suffix)
+
+        # add stock id suffix
+        def add_stock_suffix(stock: int):
+            if str(stock).startswith('600') or str(stock).startswith('601'):
+                return f"{stock}.SH"
+            elif str(stock).startswith('000') or str(stock).startswith('300') or str(stock).startswith('001'):
+                return f"{stock}.SZ"
+            else:
+                return stock
+
+        dataset['stock_id'] = dataset['stock_id'].apply(add_stock_suffix)
+        print(dataset.to_string())
+        return dataset
+
+    @staticmethod
     def fund_daily(fund_id: str) -> pd.DataFrame:
         dataset = ak.fund_etf_fund_daily_em()
         return dataset
