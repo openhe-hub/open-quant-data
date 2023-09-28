@@ -93,21 +93,47 @@ class AkshareDataset:
         return ak.stock_rank_forecast_cninfo(date)
 
     @staticmethod
+    def bond_spot(bond_id: str) -> DataFrame:
+        codes = bond_id.split('.')
+        if codes[1] == 'SH':
+            bond_id = 'sh' + codes[0]
+        elif codes[1] == 'SZ':
+            bond_id = 'sz' + codes[0]
+        dataset = ak.bond_zh_hs_cov_spot()
+        return dataset[dataset['symbol'] == bond_id]
+
+    @staticmethod
     def bond_date(bond_id: str, start_date: str, end_date: str) -> DataFrame:
         dataset = ak.bond_zh_hs_daily(bond_id)
         return dataset
 
     @staticmethod
-    def bond_info_all(filtered_date: datetime.datetime = datetime.date(2023, 8, 1)) -> DataFrame:
+    def bond_info_all_jsl(cookie: str) -> DataFrame:
+        dataset = ak.bond_cb_jsl()
+        return dataset
+
+    @staticmethod
+    def bond_info_all() -> DataFrame:
+        ak.bond_cb_jsl()
         dataset = ak.bond_zh_cov()
         dataset = pd.DataFrame({
             'bond_id': dataset['债券代码'],
             'buy_date': dataset['申购日期'],
             'stock_id': dataset['正股代码'],
+            'price': dataset['债现价'],
             'transform_ratio': dataset['转股溢价率']
         })
-        # filter date
-        dataset = dataset[dataset['buy_date'] < filtered_date]
+
+        # dataset = pd.read_csv(r'D:\program\python\my-quant-dev\libs\open-quant-data\assets\output\bond_info.csv')
+
+        # drop nan
+        dataset = dataset.dropna(axis=0, how='any')
+
+        # drop bond.bk
+        dataset = dataset[~dataset['bond_id'].str.startswith('40')]
+
+        # drop price nan
+        dataset = dataset[dataset['price'] > 0]
 
         # add bond id suffix
         def add_bond_suffix(bond: int):
@@ -122,15 +148,16 @@ class AkshareDataset:
 
         # add stock id suffix
         def add_stock_suffix(stock: int):
-            if str(stock).startswith('600') or str(stock).startswith('601'):
+            if str(stock).startswith('600') or str(stock).startswith('601') or str(stock).startswith('60') \
+                    or str(stock).startswith('688'):
                 return f"{stock}.SH"
-            elif str(stock).startswith('000') or str(stock).startswith('300') or str(stock).startswith('001'):
+            elif str(stock).startswith('000') or str(stock).startswith('300') or str(stock).startswith('001') \
+                    or str(stock).startswith('00') or str(stock).startswith('30'):
                 return f"{stock}.SZ"
             else:
                 return stock
 
         dataset['stock_id'] = dataset['stock_id'].apply(add_stock_suffix)
-        print(dataset.to_string())
         return dataset
 
     @staticmethod
