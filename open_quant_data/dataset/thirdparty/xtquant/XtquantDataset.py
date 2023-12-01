@@ -18,12 +18,10 @@ class XtquantDataset:
         self.trade.start()
         self.trade.info()
 
-    @staticmethod
-    def on_download_progress(data):
+    def on_download_progress(self, data):
         logger.info(f"downloading... total = {data['total']}, finished = {data['finished']}")
 
-    @staticmethod
-    def get_market_data(stock_ids: List[str], field_list: List[str], period: str,
+    def get_market_data(self, stock_ids: List[str], field_list: List[str], period: str,
                         start_date: datetime, end_date: datetime,
                         dividend_type: str = "front") -> Dict[str, pd.DataFrame]:
         # download
@@ -47,23 +45,20 @@ class XtquantDataset:
             data[stock_id] = data_df
         return data
 
-    @staticmethod
-    def get_market_data_single(stock_id: str, field_list: List[str], period: str,
+    def get_market_data_single(self, stock_id: str, field_list: List[str], period: str,
                                start_date: datetime, end_date: datetime,
                                dividend_type: str = "front") -> pd.DataFrame:
         data = XtquantDataset.get_market_data([stock_id], field_list, period, start_date, end_date, dividend_type)
         return data[stock_id]
 
-    @staticmethod
-    def save_market_data(stock_ids: List[str], field_list: List[str], period: str,
+    def save_market_data(self, stock_ids: List[str], field_list: List[str], period: str,
                          start_date: datetime, end_date: datetime, folder_path: str,
                          dividend_type: str = "front"):
         data = XtquantDataset.get_market_data(stock_ids, field_list, period, start_date, end_date, dividend_type)
         for stock_id in data:
             data[stock_id].to_csv(f'{folder_path}{stock_id}.csv')
 
-    @staticmethod
-    def save_market_data_single(stock_id: str, field_list: List[str], period: str,
+    def save_market_data_single(self, stock_id: str, field_list: List[str], period: str,
                                 start_date: datetime, end_date: datetime, file_path: str,
                                 dividend_type: str = "front"):
         data = XtquantDataset.get_market_data_single(stock_id, field_list, period, start_date, end_date, dividend_type)

@@ -19,6 +19,36 @@ class AkshareDataset:
         pass
 
     @staticmethod
+    def sh_stock_names() -> pd.DataFrame:
+        stock_names = ak.stock_info_sh_name_code()
+        return stock_names
+
+    @staticmethod
+    def sz_stock_names() -> pd.DataFrame:
+        stock_names = ak.stock_info_sz_name_code()
+        return stock_names
+
+    @staticmethod
+    def a_stock_names() -> pd.DataFrame:
+        sh_stock_names = AkshareDataset.sh_stock_names()
+        sh_stock_names = pd.DataFrame({
+            'stock_code': sh_stock_names['证券代码'],
+            'stock_name': sh_stock_names['证券简称'],
+            'begin_date': sh_stock_names['上市日期'],
+        })
+        sz_stock_names = AkshareDataset.sz_stock_names()
+        sz_stock_names = pd.DataFrame({
+            'stock_code': sz_stock_names['A股代码'],
+            'stock_name': sz_stock_names['A股简称'],
+            'begin_date': sz_stock_names['A股上市日期']
+        })
+        return pd.concat([sh_stock_names, sz_stock_names])
+
+    @staticmethod
+    def stock_spot():
+        return ak.stock_zh_a_spot_em()
+
+    @staticmethod
     def stock_timed(stock_id: str, start_date: str, end_date: str, period: str) -> DataFrame:
         stock = ak.stock_zh_a_hist(symbol=stock_id, period=period, start_date=start_date, end_date=end_date)
         column_translation = {
@@ -40,14 +70,22 @@ class AkshareDataset:
         return stock
 
     @staticmethod
-    def stock_date(stock_id: str, start_date: str, end_date: str) -> DataFrame:
-        stock = ak.stock_zh_a_daily(symbol=stock_id, start_date=start_date, end_date=end_date)
+    def stock_date(stock_id: str, start_date: str = '', end_date: str = '') -> DataFrame:
+        if start_date == '' and end_date == '':
+            stock = ak.stock_zh_a_daily(symbol=stock_id)
+        else:
+            stock = ak.stock_zh_a_daily(symbol=stock_id, start_date=start_date, end_date=end_date)
         return stock
 
     @staticmethod
     def stock_minute(stock_id: str, period: str) -> DataFrame:
         stock = ak.stock_zh_a_minute(symbol=stock_id, period=period)
         return stock
+
+    @staticmethod
+    def stock_basic_finance_index(stock_id: str) -> pd.DataFrame:
+        data = ak.stock_a_indicator_lg(stock_id)
+        return data
 
     @staticmethod
     def stock_profit(stock_id: str, period: ReportPeriod = ReportPeriod.QUARTERLY) -> DataFrame:
@@ -91,6 +129,42 @@ class AkshareDataset:
     @staticmethod
     def stock_rank(date: str) -> DataFrame:
         return ak.stock_rank_forecast_cninfo(date)
+
+    @staticmethod
+    def stock_price_finance(stock_id: str, start_date: datetime) -> pd.DataFrame:
+        # transform prefix stock id
+        prefix_stock_id = ''
+        if stock_id.startswith('6'):
+            prefix_stock_id = 'sh' + stock_id
+        elif stock_id.startswith('0') or stock_id.startswith('3'):
+            prefix_stock_id = 'sz' + stock_id
+        price_dataset = ak.stock_date(prefix_stock_id)
+        finance_dataset = ak.stock_basic_finance_index(stock_id)
+        # transform timestamp
+        fin_start_date = finance_dataset['trade_date'].tolist()[0]
+        price_start_date = price_dataset['date'].tolist()[0].date()
+        result_start_date = start_date.date()
+        if result_start_date < fin_start_date:
+            result_start_date = fin_start_date
+        if result_start_date < price_start_date:
+            result_start_date = price_start_date
+        # pre-handle
+        finance_dataset.rename(columns={'trade_date': 'date'}, inplace=True)
+        finance_dataset = finance_dataset[finance_dataset['date'] >= result_start_date]
+        finance_dataset = finance_dataset.fillna(value=0)
+        price_dataset = price_dataset[
+            price_dataset['date'] >= datetime(result_start_date.year, result_start_date.month, result_start_date.day)]
+        price_dataset = price_dataset.fillna(value=0)
+        # transform index
+        finance_dataset['date'] = pd.to_datetime(finance_dataset['date'], format="%Y-%m-%d")
+        price_dataset['date'] = pd.to_datetime(price_dataset['date'], format="%Y-%m-%d")
+        result_dataset = pd.merge(price_dataset, finance_dataset, how='inner', on='date')
+
+        result_dataset['ret'] = result_dataset['close'].pct_change(1)
+        result_dataset.insert(loc=2, column='stock_id', value=stock_id)
+        result_dataset = result_dataset.fillna(value=0)
+        return result_dataset
+
 
     @staticmethod
     def bond_spot(bond_id: str) -> DataFrame:

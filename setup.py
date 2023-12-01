@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="open_quant_data",
-    version="0.3.2",
+    version="0.3.6.5",
     packages=find_packages(),
     author="openhe",
     author_email="hezhewen2004@gmail.com",
