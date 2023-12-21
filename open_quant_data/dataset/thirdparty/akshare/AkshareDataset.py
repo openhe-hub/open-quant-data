@@ -46,7 +46,36 @@ class AkshareDataset:
 
     @staticmethod
     def stock_spot():
-        return ak.stock_zh_a_spot_em()
+        dataset = ak.stock_zh_a_spot_em()
+        column_translation = {
+            '序号': 'index',
+            '代码': 'stock_id',
+            '名称': 'stock_name',
+            '最新价': 'price',
+            '涨跌幅': 'ratio',
+            '涨跌额': 'ratio_value',
+            '成交量': 'volume',
+            '成交额': 'volume_value',
+            '振幅': 'amplitude',
+            '最高': 'high',
+            '最低': 'low',
+            '今开': 'today_open',
+            '昨收': 'yesterday_close',
+            '量比': 'volume_ratio',
+            '换手率': 'turnover_rate',
+            '市盈率-动态': 'pe',
+            '市净率': 'pb',
+            '总市值': 'market_value',
+            '流通市值': 'flow_market_value',
+            '涨速': 'ratio_acc',
+            '5分钟涨跌': '5m_ret',
+            '60日涨跌幅': '60d_ret',
+            '年初至今涨跌幅': 'year_ret',
+        }
+        for old_col, new_col in column_translation.items():
+            if old_col in dataset.columns:
+                dataset.rename(columns={old_col: new_col}, inplace=True)
+        return dataset
 
     @staticmethod
     def stock_timed(stock_id: str, start_date: str, end_date: str, period: str) -> DataFrame:
@@ -141,6 +170,7 @@ class AkshareDataset:
         price_dataset = ak.stock_date(prefix_stock_id)
         finance_dataset = ak.stock_basic_finance_index(stock_id)
         # transform timestamp
+        start_timestamp = start_date.strftime('%Y-%m-%d')
         fin_start_date = finance_dataset['trade_date'].tolist()[0]
         price_start_date = price_dataset['date'].tolist()[0].date()
         result_start_date = start_date.date()
